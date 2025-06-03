@@ -1,0 +1,33 @@
+#import relevant libraries and/or modules
+from pyspark.sql.functions import col
+from pyspark.sql.types import TimestampType
+
+df = spark.read.option("multiline", "true").json("Files/2025-05-20_earthquake_data.json")
+# df now is a Spark DataFrame containing JSON data from "Files/2025-05-20_earthquake_data.json".
+display(df)
+
+df = \
+df.\
+    select(
+        'id',
+        col('geometry.coordinates').getItem(0).alias('longitude'),
+        col('geometry.coordinates').getItem(1).alias('latitude'),
+        col('geometry.coordinates').getItem(2).alias('elevation'),
+        col('properties.title').alias('title'),
+        col('properties.place').alias('place_description'),
+        col('properties.sig').alias('sig'),
+        col('properties.mag').alias('mag'),
+        col('properties.magType').alias('magType'),
+        col('properties.time').alias('time'),
+        col('properties.updated').alias('updated')
+    )
+
+#new columns of time in datetime format
+df = df.\
+    withColumn('time',col('time')/1000).\
+    withColumn('updated',col('updated')/1000).\
+    withColumn('time',col('time').cast(TimestampType())).\
+    withColumn('updated',col('updated').cast(TimestampType()))
+
+#append to silver table
+df.write.mode('append').saveAsTable('test_earthquake_silver_table')
