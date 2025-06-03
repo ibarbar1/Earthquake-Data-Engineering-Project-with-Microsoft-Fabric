@@ -1,0 +1,22 @@
+from pyspark.sql.functions import when, col, udf
+from pyspark.sql.types import StringType
+#import rg to add country code based on latitude and longitude
+#install in custom fabric environment
+import reverse_geocoder as rg
+
+df = spark.read.table("test_earthquake_silver")#.filter(col('time')>start_date)
+
+#define function that extracts country code based on longitude and latitude parameters
+def get_country_code(lat,lon):
+    coordinates = (float(lat),float(lon))
+    return rg.search(coordinates)[0].get('cc')
+#register is as udf inorder to invoke it with a spark df
+get_country_code_udf = udf(get_country_code,StringType())
+
+df_with_country_code = \
+    df.withColumn("country_code",get_country_code_udf(col("latitude"),col("longitude")))\
+    .withColumn("sig_class",
+                when(col("sig")<100,"Low").when((col("sig")>=100) & (col("sig")<500),"Moderate").otherwise("High"))
+
+#append to gold table
+df_with_country_code.write.mode('append').saveAsTable('test_earthquake_gold_table')
