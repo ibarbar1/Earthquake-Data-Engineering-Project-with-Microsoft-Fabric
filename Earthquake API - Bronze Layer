@@ -1,0 +1,28 @@
+#import relevant libraries
+import requests as re
+import json
+from datetime import date, timedelta
+
+#define timeframe - commented out...to be defined later using data factory
+#start_date = date.today() - timedelta(7)
+#end_date = date.today() - timedelta(1)
+
+#build the url to be used for data requests
+url = f"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime={start_date}&endtime={end_date}"
+response = re.get(url)
+
+#success test
+if response.status_code == 200:
+    #fetch data in json format
+    data = response.json()
+    data = data['features']
+
+    #specify file name and path
+    file_path = f'/lakehouse/default/Files/{start_date}_earthquake_data.json'
+
+    #open file in write mode and save
+    with open(file_path,'w') as file:
+        json.dump(data,file,indent=4)
+    print(f"Data successfully save to {file_path}")
+else:
+    print("Failed to fetch data.Status code:",response.status_code)
