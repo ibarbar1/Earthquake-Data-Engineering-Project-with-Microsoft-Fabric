@@ -2,9 +2,8 @@
 from pyspark.sql.functions import col
 from pyspark.sql.types import TimestampType
 
-df = spark.read.option("multiline", "true").json("Files/2025-05-20_earthquake_data.json")
-# df now is a Spark DataFrame containing JSON data from "Files/2025-05-20_earthquake_data.json".
-display(df)
+df = spark.read.option("multiline", "true").json(f"Files/{start_date}_earthquake_data.json")
+# df now is a Spark DataFrame containing JSON data from file ingested from bronze
 
 df = \
 df.\
