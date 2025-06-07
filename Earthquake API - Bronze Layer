@@ -1,11 +1,6 @@
 #import relevant libraries
 import requests as re
 import json
-from datetime import date, timedelta
-
-#define timeframe - commented out...to be defined later using data factory
-#start_date = date.today() - timedelta(7)
-#end_date = date.today() - timedelta(1)
 
 #build the url to be used for data requests
 url = f"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime={start_date}&endtime={end_date}"
